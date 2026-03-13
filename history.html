@@ -126,21 +126,21 @@
         </div>
       </div>
 
-      <!-- Activity Tab -->
-      <div class="hpane" id="hpane-a">
-        <div class="card-c">
-          <div class="section-hdr mb-3">
-            <span class="card-title">Activity Log</span>
-            <input type="text" class="fc" id="aSearch" placeholder="<i class="bi bi-search"></i> Filter…" style="max-width:200px" oninput="filterA()">
-          </div>
-          <div id="aTl"></div>
-        </div>
+   <!-- Activity Tab -->
+<div class="hpane" id="hpane-a">
+  <div class="card-c">
+    <div class="section-hdr mb-3">
+      <span class="card-title">Activity Log</span>
+      <div style="position:relative">
+        <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="fc" id="aSearch" placeholder="Filter…" style="max-width:200px;padding-left:30px" oninput="filterA()">
       </div>
-
     </div>
+    <div id="aTl"></div>
   </div>
 </div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>

@@ -65,22 +65,24 @@
       </div>
 
       <!-- History -->
-      <div class="card-c mt-4" style="padding:0;overflow:hidden">
-        <div style="padding:12px 18px;border-bottom:1px solid var(--border);background:var(--bg-tertiary);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <span class="card-title">Bill History</span>
-          <div style="display:flex;gap:8px">
-            <input type="text" class="fc" id="bSearch" placeholder="<i class="bi bi-search"></i> Search…" style="max-width:180px" oninput="filterHistory()">
-            <button class="btn-g" onclick="exportBills()"><i class="bi bi-download"></i> CSV</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="tbl">
-            <thead><tr><th>Order #</th><th>Type</th><th>Subtotal</th><th>Tax</th><th>Discount</th><th>Total</th><th>Method</th><th>Date</th><th></th></tr></thead>
-            <tbody id="billHistBody"><tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:28px">Loading…</td></tr></tbody>
-          </table>
-        </div>
+<div class="card-c mt-4" style="padding:0;overflow:hidden">
+  <div style="padding:12px 18px;border-bottom:1px solid var(--border);background:var(--bg-tertiary);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <span class="card-title">Bill History</span>
+    <div style="display:flex;gap:8px">
+      <div style="position:relative">
+        <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="fc" id="bSearch" placeholder="Search…" style="max-width:180px;padding-left:30px" oninput="filterHistory()">
       </div>
+      <button class="btn-g" onclick="exportBills()"><i class="bi bi-download"></i> CSV</button>
     </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="tbl">
+      <thead><tr><th>Order #</th><th>Type</th><th>Subtotal</th><th>Tax</th><th>Discount</th><th>Total</th><th>Method</th><th>Date</th><th></th></tr></thead>
+      <tbody id="billHistBody"><tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:28px">Loading…</td></tr></tbody>
+    </table>
   </div>
 </div>
 

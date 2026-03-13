@@ -477,7 +477,12 @@ function startLiveSub() {
     .onSnapshot(snap => {
       liveOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderLiveList();
-    }, () => {});
+      // ← KEY FIX: if a detail panel is open, refresh it with latest data
+      if (selOrderId) {
+        const updated = liveOrders.find(o => o.id === selOrderId);
+        if (updated) renderLiveDetail(updated);
+      }
+    }, e => Toast.error('Live orders error: ' + e.message));
 }
 
 function renderLiveList() {
@@ -579,6 +584,9 @@ function renderLiveDetail(order) {
 }
 
 async function advanceOrder(orderId, newStatus) {
+  // Disable all advance buttons immediately so user can't double-tap
+  document.querySelectorAll('#liveDetail button').forEach(b => { b.disabled = true; });
+
   try {
     await db.collection(C.ORDERS).doc(orderId).update({
       status: newStatus,
@@ -593,7 +601,12 @@ async function advanceOrder(orderId, newStatus) {
     }
     await logActivity('order_advanced', { orderId, status: newStatus });
     Toast.success('Order <i class="bi bi-arrow-right"></i> ' + newStatus);
-  } catch (e) { Toast.error(e.message); }
+    // onSnapshot will fire and refresh both list + detail automatically
+  } catch (e) {
+    // Re-enable buttons on error so user can retry
+    document.querySelectorAll('#liveDetail button').forEach(b => { b.disabled = false; });
+    Toast.error(e.message);
+  }
 }
 </script>
 

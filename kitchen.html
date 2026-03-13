@@ -97,15 +97,19 @@ function startClock() {
 }
 
 function startSubscription() {
+  // No orderBy here — that requires a composite Firestore index which may not exist.
+  // We sort client-side in render() instead. This ensures onSnapshot fires reliably
+  // for every status change without any index setup.
   db.collection(C.ORDERS)
     .where('status', 'in', ['Pending', 'Cooking', 'Ready'])
-    .orderBy('createdAt', 'asc')
     .onSnapshot(snap => {
       liveOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       render();
-    }, e => Toast.error(e.message));
+    }, e => {
+      console.error('Kitchen snapshot error:', e);
+      Toast.error('Kitchen feed error: ' + e.message);
+    });
 
-  // Refresh timer display every second
   clearInterval(timerTick);
   timerTick = setInterval(updateTimers, 1000);
 }
@@ -141,7 +145,7 @@ function cardHtml(order) {
   for (const s of next) {
     const cls = s === 'Cancelled' ? 'btn-d btn-sm' : 'btn-p btn-sm';
     const lbl = s === 'Cancelled' ? '<i class="bi bi-x-circle-fill"></i> Cancel' : '<i class="bi bi-arrow-right"></i> ' + s;
-    btns += `<button class="${cls}" onclick="advance('${order.id}','${s}')" style="width:100%;justify-content:center;margin-top:4px">${lbl}</button>`;
+    btns += `<button class="${cls}" onclick="advance('${order.id}','${s}',this)" style="width:100%;justify-content:center;margin-top:4px">${lbl}</button>`;
   }
 
   const tableLbl = order.tableNumber ? 'Table ' + order.tableNumber : (order.type || 'Takeaway');
@@ -172,6 +176,16 @@ function render() {
     if (groups[o.status]) groups[o.status].push(o);
   });
 
+  // Sort each column oldest-first so kitchen works in FIFO order
+  const byTime = (a, b) => {
+    const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+    const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+    return ta - tb;
+  };
+  groups.Pending.sort(byTime);
+  groups.Cooking.sort(byTime);
+  groups.Ready.sort(byTime);
+
   document.getElementById('cntPending').textContent = groups.Pending.length;
   document.getElementById('cntCooking').textContent = groups.Cooking.length;
   document.getElementById('cntReady').textContent   = groups.Ready.length;
@@ -190,14 +204,19 @@ function updateTimers() {
   });
 }
 
-async function advance(orderId, newStatus) {
+async function advance(orderId, newStatus, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     const updates = { status: newStatus };
     updates[newStatus.toLowerCase() + 'At'] = firebase.firestore.FieldValue.serverTimestamp();
     await db.collection(C.ORDERS).doc(orderId).update(updates);
     await logActivity('order_advanced', { orderId, status: newStatus });
     Toast.success('<i class="bi bi-arrow-right"></i> ' + newStatus);
-  } catch (e) { Toast.error(e.message); }
+    // onSnapshot fires automatically and re-renders the board
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = '<i class="bi bi-arrow-right"></i> ' + newStatus; }
+    Toast.error(e.message);
+  }
 }
 </script>
 
